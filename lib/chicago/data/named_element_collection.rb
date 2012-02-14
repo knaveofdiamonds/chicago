@@ -1,7 +1,7 @@
 require 'forwardable'
 
 module Chicago
-  module Schema
+  module Data
     # Stores named elements in a Set-like collection.
     #
     # Elements must respond to the method +name+. Elements will be

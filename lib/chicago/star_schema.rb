@@ -1,5 +1,5 @@
 require 'chicago/errors'
-require 'chicago/schema/named_element_collection'
+require 'chicago/data/named_element_collection'
 require 'chicago/schema/column'
 require 'chicago/schema/measure'
 require 'chicago/schema/dimension_reference'
@@ -21,8 +21,8 @@ module Chicago
 
     # Creates a new star schema.
     def initialize
-      @dimensions = Schema::NamedElementCollection.new
-      @facts = Schema::NamedElementCollection.new
+      @dimensions = Data::NamedElementCollection.new
+      @facts = Data::NamedElementCollection.new
     end
 
     # Returns a fact, named +name+

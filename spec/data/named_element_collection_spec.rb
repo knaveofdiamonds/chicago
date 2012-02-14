@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Chicago::Schema::NamedElementCollection do
+describe Chicago::Data::NamedElementCollection do
   before :each do
     @e = stub(:element, :name => :foo)
   end
