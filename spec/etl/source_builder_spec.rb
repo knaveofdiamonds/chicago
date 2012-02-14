@@ -8,30 +8,37 @@ describe Chicago::ETL::SourceBuilder, "builds a Source that" do
   end
 
   it "has a name" do
-    subject.build(:users, @db).name.should == :users
+    subject.build(:users, :db => @db).name.should == :users
   end
   
   it "can have columns defined" do
-    source = subject.build(:users, @db) do
+    source = subject.build(:users, :db => @db) do
       columns(:id, :name)
     end
     source.columns.should == [:id, :name]
   end
 
+  it "has all the table's columns defined by default" do
+    dataset = mock()
+    dataset.should_receive(:columns).and_return([:id, :name])
+    @db.stub(:[]).with(:users).and_return(dataset)
+    subject.build(:users, :db => @db).columns.should == [:id, :name]
+  end
+  
   it "is valid if the table exists in the source database" do
     @db.should_receive(:table_exists?).with(:users).and_return(true)
-    subject.build(:users, @db).should be_valid
+    subject.build(:users, :db => @db).should be_valid
   end
 
   it "is not valid if the table doesn't exist in the source database" do
     @db.should_receive(:table_exists?).with(:users).and_return(false)
-    subject.build(:users, @db).should_not be_valid
+    subject.build(:users, :db => @db).should_not be_valid
   end
 
   it "can have an explicit table name defined, different from name" do
     @db.should_receive(:table_exists?).with(:users).and_return(true)
 
-    subject.build(:visitors, @db) do
+    subject.build(:visitors, :db => @db) do
       table_name :users
     end.should be_valid
   end
@@ -47,16 +54,42 @@ describe Chicago::ETL::SourceBuilder, "builds a Source that" do
     end
 
     it "can be built from a Dimension, with an assumed name" do
-      subject.build(@dimension, @db).name.should == :users
+      subject.build(@dimension, :db => @db).name.should == :users
     end
 
     it "takes a column from the Dimension" do
-      subject.build(@dimension, @db).columns.should include(:name)
+      subject.build(@dimension, :db => @db).columns.should include(:name)
     end
 
     it "assumes original_id == id in the source" do
-      subject.build(@dimension, @db).columns.should_not include(:original_id)
-      subject.build(@dimension, @db).columns.should include(:id)
+      subject.build(@dimension, :db => @db).columns.should_not include(:original_id)
+      subject.build(@dimension, :db => @db).columns.should include(:id)
+    end
+  end
+
+  describe "from a fact" do
+    before :each do
+      @dimension = @schema.define_dimension(:user)
+
+      @fact = @schema.define_fact(:sales) do
+        dimensions :user
+
+        degenerate_dimensions do
+          integer :original_id
+        end
+
+        measures do
+          integer :amount
+        end
+      end
+    end
+
+    it "can be built from a Fact, with an assumed name" do
+      subject.build(@fact, :db => @db).name.should == :sales
+    end
+
+    it "has columns" do
+      subject.build(@fact, :db => @db).columns.should == [:id, :user_id, :amount]
     end
   end
 end

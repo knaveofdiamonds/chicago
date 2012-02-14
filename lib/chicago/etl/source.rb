@@ -5,20 +5,28 @@ module Chicago
       # context.
       attr_reader :name
 
-      # The columns defined in this data source.
-      attr_reader :columns
-
-      def initialize(name, db, options={})
+      def initialize(name, options={})
         @name = name.to_sym
-        @db = db
-        @columns = options[:columns] || []
+        @db = options[:db]
+        @columns = options[:columns]
         @table_name = options[:table_name] || @name
       end
 
-      # Returns true if the backing database table exists.
-      def valid?
-        !! @db.table_exists?(@table_name)
+      # The columns defined in this data source.
+      def columns
+        @columns || @db[table_name].columns
       end
+      
+      # Returns true if the backing database table exists.
+      #
+      # Does not currently validate the column set.
+      def valid?
+        !! @db.table_exists?(table_name)
+      end
+
+      private
+
+      attr_reader :table_name
     end
   end
 end

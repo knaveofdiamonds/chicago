@@ -5,10 +5,10 @@ module Chicago
   module ETL
     class SourceBuilder
       # Builds a source named name, representing a table or query in db.
-      def build(obj, db, &block)
-        @options = {}
+      def build(obj, options=nil, &block)
+        @options = options || {}
         instance_eval(&block) if block_given?
-        _build(obj, db)
+        _build(obj)
       end
 
       protected
@@ -27,27 +27,42 @@ module Chicago
 
       private
 
-      def _build(obj, db)
-        case obj
-        when Symbol
-          build_from_name(obj, db)
-        when Chicago::Schema::Dimension
-          build_from_dimension(obj, db)
-        end
+      def _build(obj)
+        name = case obj
+               when Symbol
+                 obj
+               when Chicago::Schema::Dimension
+                 build_from_dimension(obj)
+               when Chicago::Schema::Fact
+                 build_from_fact(obj)
+               end
+        Source.new(name, @options)
       end
       
-      def build_from_name(name, db)
-        Source.new(name, db, @options)
-      end
-
-      def build_from_dimension(dimension, db)
+      def build_from_dimension(dimension)
         name = dimension.name.to_s.pluralize.to_sym
         set_columns_from_dimension(dimension)
-        Source.new(name, db, @options)
+        name
+      end
+
+      def build_from_fact(fact)
+        set_columns_from_fact(fact)
+        fact.name
       end
 
       def set_columns_from_dimension(dimension)
         @options[:columns] = dimension.columns.map(&:name)
+        replace_original_id_with_id
+      end
+
+      def set_columns_from_fact(fact)
+        @options[:columns] = fact.dimensions.map {|d| "#{d.name}_id".to_sym }
+        @options[:columns] += fact.degenerate_dimensions.map(&:name) +
+          fact.measures.map(&:name)
+        replace_original_id_with_id
+      end
+
+      def replace_original_id_with_id
         if @options[:columns].delete(:original_id)
           @options[:columns].unshift :id
         end

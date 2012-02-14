@@ -6,9 +6,9 @@ module Chicago
     extend self
     
     def define_database_source(name, db, &block)
-      sources.add(SourceBuilder.new.build(name, db, &block))
+      sources.add(SourceBuilder.new.build(name, {:db => db}, &block))
     end
-
+    
     def sources
       @sources ||= Chicago::Data::NamedElementCollection.new
     end
