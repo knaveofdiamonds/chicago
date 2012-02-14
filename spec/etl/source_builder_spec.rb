@@ -18,6 +18,18 @@ describe Chicago::ETL::SourceBuilder, "builds a Source that" do
     source.columns.should == [:id, :name]
   end
 
+  it "can modify the dataset to join  or filter" do
+    source = subject.build(:users, :db => TEST_DB) do
+      columns(:id, :name)
+
+      dataset do |ds|
+        ds.where(:name => "Foo")
+      end
+    end
+    
+    source.dataset.sql.should =~ /WHERE \(`name` = 'Foo'\)/
+  end
+  
   it "has all the table's columns defined by default" do
     dataset = mock()
     dataset.should_receive(:columns).and_return([:id, :name])

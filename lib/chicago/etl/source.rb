@@ -5,16 +5,21 @@ module Chicago
       # context.
       attr_reader :name
 
+      attr_reader :dataset
+      
       def initialize(name, options={})
         @name = name.to_sym
         @db = options[:db]
         @columns = options[:columns]
         @table_name = options[:table_name] || @name
+        @dataset = (options[:dataset] || lambda {|ds| ds }).
+          call(@db[table_name])
+        @dataset = @dataset.select(*@columns) if @columns
       end
 
       # The columns defined in this data source.
       def columns
-        @columns || @db[table_name].columns
+        @columns || @dataset.columns
       end
       
       # Returns true if the backing database table exists.

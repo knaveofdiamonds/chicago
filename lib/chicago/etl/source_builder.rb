@@ -25,6 +25,11 @@ module Chicago
         @options[:table_name] = name
       end
 
+      
+      def dataset(&block)
+        @options[:dataset] = block
+      end
+      
       private
 
       def _build(obj)
