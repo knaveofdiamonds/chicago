@@ -5,8 +5,8 @@ module Chicago
   module ETL
     extend self
     
-    def define_database_source(name, db, &block)
-      sources.add(SourceBuilder.new.build(name, {:db => db}, &block))
+    def define_source(type, name, db, &block)
+      sources.add(SourceBuilder.new.build(type, name, {:db => db}, &block))
     end
     
     def sources

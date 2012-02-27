@@ -5,7 +5,8 @@ module Chicago
   module ETL
     class SourceBuilder
       # Builds a source named name, representing a table or query in db.
-      def build(obj, options=nil, &block)
+      def build(source_type, obj, options=nil, &block)
+        @source_class = DatabaseSource
         @options = options || {}
         instance_eval(&block) if block_given?
         _build(obj)
@@ -25,7 +26,11 @@ module Chicago
         @options[:table_name] = name
       end
 
-      
+      # Captures the block and passes it to the source as the dataset
+      # option.
+      #
+      # The block is expected to be source-type specific, and used to
+      # filter or otherwise modify the raw underlying data.
       def dataset(&block)
         @options[:dataset] = block
       end
@@ -41,7 +46,7 @@ module Chicago
                when Chicago::Schema::Fact
                  build_from_fact(obj)
                end
-        Source.new(name, @options)
+        @source_class.new(name, @options)
       end
       
       def build_from_dimension(dimension)
