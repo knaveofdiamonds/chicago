@@ -67,6 +67,7 @@ module Chicago
     class DimensionAsColumn < AbstractQualifiedColumn
       def initialize(owner, column, column_alias)
         super
+        # TODO: fix case when there is no main identifier.
         @select_name = @column.main_identifier.qualify(@column.name)
         @count_name  = @column.original_key.name.qualify(@column.name)
         @group_name  = @column.original_key.name.qualify(@column.name)
