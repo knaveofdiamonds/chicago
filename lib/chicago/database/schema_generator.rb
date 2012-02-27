@@ -56,7 +56,7 @@ module Chicago
 
       def key_table(dimension)
         {"keys_#{dimension.table_name}".to_sym => {
-            :primary_key => [dimension.original_key.name, :dimension_id],
+            :primary_key => [dimension.original_key.name],
             :columns => [visit_column(dimension.original_key),
                          {:name => :dimension_id, :column_type => :integer, :unsigned => true, :null => false}]
           }

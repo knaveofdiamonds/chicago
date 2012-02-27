@@ -154,7 +154,7 @@ describe Chicago::Database::SchemaGenerator do
 
       key_table = subject.visit_dimension(@dimension)[:keys_dimension_user]
       key_table.should_not be_nil
-      key_table[:primary_key].should == [:original_id, :dimension_id]
+      key_table[:primary_key].should == [:original_id]
 
       expected = [{:name => :original_id, :column_type => :integer, :null => false, :unsigned => true},
                   {:name => :dimension_id, :column_type => :integer, :null => false, :unsigned => true}]
