@@ -1,5 +1,6 @@
 require 'chicago/data/named_element_collection'
 require 'chicago/etl/source_builder'
+require 'chicago/etl/graph'
 
 module Chicago
   module ETL
