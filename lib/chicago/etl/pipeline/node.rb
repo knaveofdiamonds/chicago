@@ -17,12 +17,16 @@ module Chicago
           @marked
         end
 
-        def source?
+        def origin?
           @in.empty?
         end
 
         def target?
           @out.empty?
+        end
+
+        def table?
+          false
         end
         
         def >(node)
@@ -43,8 +47,8 @@ module Chicago
           _traverse_to_end(false, :@out, :target?)
         end
 
-        def sources
-          _traverse_to_end(false, :@in, :source?)
+        def origins
+          _traverse_to_end(false, :@in, :origin?)
         end
 
         def in_cycle?

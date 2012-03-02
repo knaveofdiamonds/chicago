@@ -24,8 +24,8 @@ describe Chicago::ETL::Pipeline::Node do
 
   it "should be a source if it has no inbound nodes" do
     @a > @b
-    @a.should be_source
-    @b.should_not be_source
+    @a.should be_origin
+    @b.should_not be_origin
   end
 
   it "should be a target if it has no outbound nodes" do
@@ -52,7 +52,7 @@ describe Chicago::ETL::Pipeline::Node do
     @a.should_not be_flowing_to(@d)
   end
 
-  it "should be flowing from a source via in links" do
+  it "should be flowing from a origin via in links" do
     @a > @b > @c
 
     @b.should be_flowing_from(@a)
@@ -82,12 +82,12 @@ describe Chicago::ETL::Pipeline::Node do
     @d.targets.should == Set.new
   end
 
-  it "should have sources" do
+  it "should have origins" do
     @a > @b > @d
     @c > @d
 
-    @d.sources.should == Set.new([@a, @c])
-    @c.sources.should == Set.new
+    @d.origins.should == Set.new([@a, @c])
+    @c.origins.should == Set.new
   end
 
   it "should be cyclic if it includes itself in targets" do
@@ -101,10 +101,14 @@ describe Chicago::ETL::Pipeline::Node do
     @c.should_not be_in_cycle
   end
 
-  it "should be cyclic if it includes itself in sources" do
+  it "should be cyclic if it includes itself in origins" do
     @a > @b > @c
     @b > @d > @a
 
-    @a.sources.should include(@a)
+    @a.origins.should include(@a)
+  end
+
+  it "should not be a table, by default" do
+    @a.should_not be_table
   end
 end

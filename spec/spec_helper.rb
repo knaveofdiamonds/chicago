@@ -8,7 +8,8 @@ require 'rspec/autorun'
 include Chicago
 
 unless defined? TEST_DB
-  TEST_DB = Sequel.connect(YAML.load(File.read(File.dirname(__FILE__) + "/db_connections.yml")))
+  TEST_DB_CONFIG = YAML.load(File.read(File.dirname(__FILE__) + "/db_connections.yml"))
+  TEST_DB = Sequel.connect(TEST_DB_CONFIG)
 end
 
 # Requires supporting files with custom matchers and macros, etc,
