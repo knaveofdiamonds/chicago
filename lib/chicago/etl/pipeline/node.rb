@@ -4,15 +4,23 @@ module Chicago
   module ETL
     module Pipeline
       class Node
-        attr_reader :out, :in
+        attr_reader :out, :in, :columns
 
         def initialize(pipeline)
           @out = Set.new
           @in  = Set.new
           @marked = false
+          @columns = Chicago::Data::NamedElementCollection.new
           pipeline.add(self)
         end
 
+        def add_column(column)
+          @columns.add(column)
+          @in.each do |in_node|
+            in_node.add_column(column)
+          end
+        end
+        
         def marked?
           @marked
         end

@@ -12,6 +12,11 @@ describe Chicago::ETL::Pipeline::Pipeline do
     @pipeline.nodes.should == Set.new([node])
   end
 
+  it "knows which nodes are source nodes" do
+    node = Chicago::ETL::Pipeline::SourceNode.new(@pipeline, :foo)
+    @pipeline.source_nodes.to_a == [node]
+  end
+  
   it "can have defined sources" do
     source = stub(:source, :name => :name)
     builder = mock(:source_builder)

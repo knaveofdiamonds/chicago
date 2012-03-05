@@ -17,7 +17,7 @@ describe Chicago::ETL::Pipeline::NodeFactory do
   end
 
   it "should build a dimension node" do
-    @schema.should_receive(:dimension).with(:foo).and_return(stub(:dimension, :name => :foo))
+    @schema.should_receive(:dimension).with(:foo).and_return(stub(:dimension, :name => :foo, :columns => [stub(:name => :foo)]))
 
     pipeline = described_class.new(@pipeline, @schema).build do
       dimension(:foo)

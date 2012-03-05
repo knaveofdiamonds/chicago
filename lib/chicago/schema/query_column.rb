@@ -1,3 +1,5 @@
+require 'chicago/schema/column_decorator'
+
 module Chicago
   module Schema
     # Decorates/adapts Columns so they can be used in SQL statements
@@ -8,21 +10,7 @@ module Chicago
     #     QueryColumn.column(owner, column, "some.alias")
     #
     # @abstract
-    class QueryColumn
-      instance_methods.each do |m|
-        undef_method m unless m =~ /(^__|^send$|^object_id$)/
-      end
-
-      # @private
-      def initialize(column)
-        @column = column
-      end
-
-      # @private
-      def method_missing(*args, &block)
-        @column.send(*args, &block)
-      end
-
+    class QueryColumn < ColumnDecorator
       # Factory method that returns a query column.
       #
       # @param owner the column owner, normally a fact or dimension

@@ -25,4 +25,9 @@ describe Chicago::ETL::Pipeline::DimensionNode do
     @dimension.should_receive(:name).and_return(:foo)
     described_class.new(@pipeline, @dimension).name.should == :foo
   end
+
+  it "should get columns from the dimension" do
+    @dimension.should_receive(:columns).and_return([:a, :b])
+    described_class.new(@pipeline, @dimension).columns.should == [:a, :b]
+  end
 end

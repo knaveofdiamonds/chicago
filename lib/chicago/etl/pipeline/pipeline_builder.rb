@@ -12,15 +12,27 @@ module Chicago
 
         def build(&block)
           instance_eval(&block)
+          @pipeline.dimension_nodes.each(&:propagate_columns)
           @pipeline
         end
 
         def source(name)
-          SourceNode.new(@pipeline, name)
+          n = @pipeline.source_nodes.detect {|n| n.name == name }
+          n || SourceNode.new(@pipeline, name)
         end
 
         def dimension(name)
-          DimensionNode.new(@pipeline, @schema.dimension(name))
+          rn = RenameNode.new(@pipeline, :id.as(:original_id))
+          dn = DimensionNode.new(@pipeline, @schema.dimension(name))
+          rn > dn
+        end
+
+        def transform(name)
+          Node.new(@pipeline)
+        end
+
+        def rename(renames)
+          RenameNode.new(@pipeline, renames)
         end
 
         def fact(name)
