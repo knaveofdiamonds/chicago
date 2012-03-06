@@ -180,4 +180,29 @@ describe Chicago::ETL::Pipeline::Node do
     @c.downstream.should == Set.new([@d])
     @d.downstream.should == Set.new()
   end
+
+  it "allows insertion of nodes in an already defined pipeline" do
+    @a > @c
+    @a > @d
+    
+    @a.insert(@b)
+    
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c, @d])
+    @b.upstream.should == Set.new([@a])
+    @c.upstream.should == Set.new([@b])
+    @d.upstream.should == Set.new([@b])
+  end
+
+  it "allows insertion of multiple nodes in an already defined pipeline" do
+    @a > @d
+    
+    @a.insert(@b > @c)
+    
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c])
+    @b.upstream.should == Set.new([@a])
+    @c.downstream.should == Set.new([@d])
+    @d.upstream.should == Set.new([@c])
+  end
 end
