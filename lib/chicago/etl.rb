@@ -1,6 +1,5 @@
 require 'chicago/data/named_element_collection'
 require 'chicago/etl/source_builder'
-require 'chicago/etl/graph'
 require 'chicago/etl/batch_execution'
 require 'chicago/etl/pipeline/pipeline'
 require 'chicago/etl/pipeline/node'
