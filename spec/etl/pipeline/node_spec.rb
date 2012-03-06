@@ -9,12 +9,12 @@ describe Chicago::ETL::Pipeline::Node do
   
   it "should create a directed edge from node a to node b, using >" do
     @a > @b
-    @a.out.should == Set.new([@b])
+    @a.downstream.should == Set.new([@b])
   end
 
   it "should create a back edge from node b to node a using >" do
     @a > @b
-    @b.in.should == Set.new([@a])
+    @b.upstream.should == Set.new([@a])
   end
 
   it "should add the node to the pipeline" do
@@ -34,14 +34,23 @@ describe Chicago::ETL::Pipeline::Node do
     @b.should be_target
   end
 
-  it "should return node b from pipeline" do
-    (@a > @b).should == @b
+  it "should return itself as out and in" do
+    @a.in.should == @a
+    @a.out.should == @a
+  end
+
+  it "should return node b as the out from a connection" do
+    (@a > @b).out.should == @b
+  end
+
+  it "should return node a as the in from a connection" do
+    (@a > @b).in.should == @a
   end
 
   it "should link multiple nodes together" do
-    (@a > @b > @c).should == @c
-    @a.out.should == Set.new([@b])
-    @b.out.should == Set.new([@c])
+    @a > @b > @c
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c])
   end
 
   it "should be flowing to a target via out links" do
@@ -93,10 +102,7 @@ describe Chicago::ETL::Pipeline::Node do
   it "should be cyclic if it includes itself in targets" do
     @a > @b > @c
     @b > @d > @a
-    @a.targets.should == Set.new([@a, @c])
-    @a.should_not be_marked
-    @b.should_not be_marked
-    @c.should_not be_marked
+    @a.targets.should == Set.new([@c])
     @a.should be_in_cycle
     @c.should_not be_in_cycle
   end
@@ -105,10 +111,73 @@ describe Chicago::ETL::Pipeline::Node do
     @a > @b > @c
     @b > @d > @a
 
-    @a.origins.should include(@a)
+    @a.should be_in_cycle
   end
 
   it "should not be a table, by default" do
     @a.should_not be_table
+  end
+
+  it "can be assigned, and in and out wire up correctly" do
+    x = @b > @c
+    @a > x
+
+    @a.downstream.should == Set.new([@b])
+    @b.upstream.should == Set.new([@a])
+  end
+
+  it "can be assigned multiple times, and in and out wire up correctly" do
+    x = @a > @b
+    y = @c > @d
+    x > y
+
+    @b.downstream.should == Set.new([@c])
+    @c.upstream.should == Set.new([@b])
+  end
+
+  it "has upstream and downstream sets, when assigned" do
+    x = @b > @c
+    @a > x
+    x > @d
+
+    x.upstream.should == Set.new([@a])
+    x.downstream.should == Set.new([@d])
+  end
+
+  it "should be assignable multiple times" do
+    x = @b > @c
+    y = x > @d
+    @a > y
+
+    @a.downstream.should == Set.new([@b])
+    @b.upstream.should == Set.new([@a])
+  end
+
+  it "should create a directed edge from node a to node b, using <" do
+    @b < @a
+    @a.downstream.should == Set.new([@b])
+  end
+
+  it "should have left to right precedence when using both < and >, check 1" do
+    @b < @a > @c
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c])
+    @c.downstream.should == Set.new()
+  end
+
+  it "should have left to right precedence when using both < and >, check 2" do
+    @b > @c > @d < @a
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c])
+    @c.downstream.should == Set.new([@d])
+    @d.downstream.should == Set.new()
+  end
+
+  it "should have precedence overridden by brackets" do
+    @a > @b > (@d < @c)
+    @a.downstream.should == Set.new([@b])
+    @b.downstream.should == Set.new([@c])
+    @c.downstream.should == Set.new([@d])
+    @d.downstream.should == Set.new()
   end
 end

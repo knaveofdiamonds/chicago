@@ -4,33 +4,37 @@ module Chicago
   module ETL
     module Pipeline
       class Node
-        attr_reader :out, :in, :columns
+        attr_reader :downstream, :upstream, :columns
 
-        def initialize(pipeline)
-          @out = Set.new
-          @in  = Set.new
-          @marked = false
+        def initialize(pipeline, data=nil)
+          @downstream = Set.new
+          @upstream  = Set.new
           @columns = Chicago::Data::NamedElementCollection.new
+          @data = data
           pipeline.add(self)
         end
 
         def add_column(column)
           @columns.add(column)
-          @in.each do |in_node|
+          @upstream.each do |in_node|
             in_node.add_column(column)
           end
         end
-        
-        def marked?
-          @marked
+
+        def out
+          self
+        end
+
+        def in
+          self
         end
 
         def origin?
-          @in.empty?
+          @upstream.empty?
         end
 
         def target?
-          @out.empty?
+          @downstream.empty?
         end
 
         def table?
@@ -38,51 +42,60 @@ module Chicago
         end
         
         def >(node)
-          @out << node
-          node.in << self
-          node
+          Connection.new(self, node.in)
         end
 
+        def <(node)
+          Connection.new(node.out, self)
+        end
+        
         def flowing_to?(node)
-          connected?(node, :@out)
+          connected?(node, :@downstream)
         end
 
         def flowing_from?(node)
-          connected?(node, :@in)
+          connected?(node, :@upstream)
         end
 
-        def targets(flag = false)
-          _traverse_to_end(false, :@out, :target?)
+        def targets
+          Set.new(DepthFirstIterator.downstream(self).select(&:target?)) - Set.new([self])
         end
 
         def origins
-          _traverse_to_end(false, :@in, :origin?)
+          Set.new(DepthFirstIterator.upstream(self).select(&:origin?)) - Set.new([self])
         end
 
         def in_cycle?
-          targets.include?(self)
+          DepthFirstIterator.downstream(self).has_cycles?
         end
         
         protected
-
-        def _traverse_to_end(not_first_node, var, method)
-          if (not_first_node && send(method)) || @marked
-            @marked = false
-            Set.new([self])
-          else
-            @marked = true
-            instance_variable_get(var).inject(Set.new) do |set, node|
-              value = set | node._traverse_to_end(true, var, method)
-              @marked = false
-              value
-            end
-          end
-        end
         
         def connected?(node, edges)
           nodes = instance_variable_get(edges)
           return true if nodes.include?(node)
           nodes.any? {|n| n.connected?(node, edges) }
+        end
+      end
+
+      class Connection
+        extend Forwardable
+        
+        def_delegators :@out, :out, :downstream
+        def_delegators :@in, :in, :upstream
+        
+        def initialize(in_node, out_node)
+          @in, @out = in_node, out_node
+          @in.downstream << @out.in
+          @out.upstream << @in.out
+        end
+
+        def >(node)
+          Connection.new(self, node)
+        end
+
+        def <(node)
+          Connection.new(node, self)
         end
       end
     end

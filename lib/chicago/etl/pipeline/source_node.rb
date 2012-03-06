@@ -11,45 +11,32 @@ module Chicago::ETL::Pipeline
 
   class SourceNode < TableNode
     # The name of this source
-    attr_reader :name
-
-    def initialize(pipeline, name)
-      super pipeline
-      @name = name
+    def name
+      @data
     end
   end
 
   class DimensionNode < TableNode
     extend Forwardable
-    def_delegators :@dimension, :columns
+    def_delegators :@data, :columns
     
-    def initialize(pipeline, dimension)
-      super pipeline
-      @dimension = dimension
-    end
-
     def propagate_columns
-      @in.each do |in_node|
+      @upstream.each do |in_node|
         columns.each {|column| in_node.add_column(column) }
       end
     end
     
     def name
-      @dimension.name
+      @data.name
     end
   end
 
   class FactNode < TableNode
     extend Forwardable
-    def_delegators :@fact, :columns
-    
-    def initialize(pipeline, fact)
-      super pipeline
-      @fact = fact
-    end
-    
+    def_delegators :@data, :columns
+        
     def name
-      @fact.name
+      @data.name
     end
   end
 
@@ -66,16 +53,16 @@ module Chicago::ETL::Pipeline
   
   class RenameNode < Node
     def initialize(pipeline, *names)
-      super pipeline
-      @renames = names.inject({}) {|hsh, expr|
+      data = names.inject({}) {|hsh, expr|
         hsh[expr.aliaz] = expr
         hsh
       }
+      super pipeline, data
     end
 
     def add_column(column)
-      if @renames[column.name]
-        super rename_column(column, @renames[column.name])
+      if @data[column.name]
+        super rename_column(column, @data[column.name])
       else
         super
       end

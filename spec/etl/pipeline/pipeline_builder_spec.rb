@@ -23,8 +23,8 @@ describe Chicago::ETL::Pipeline::NodeFactory do
       dimension(:foo)
     end
 
-    node = pipeline.nodes.first
-    node.should be_kind_of(Chicago::ETL::Pipeline::DimensionNode)
+    node = pipeline.dimension_nodes.first
+    node.out.should be_kind_of(Chicago::ETL::Pipeline::DimensionNode)
   end
 
   it "should build a fact node" do

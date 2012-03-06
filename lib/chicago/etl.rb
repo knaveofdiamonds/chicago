@@ -4,6 +4,7 @@ require 'chicago/etl/graph'
 require 'chicago/etl/batch_execution'
 require 'chicago/etl/pipeline/pipeline'
 require 'chicago/etl/pipeline/node'
+require 'chicago/etl/pipeline/node_iterators'
 require 'chicago/etl/pipeline/source_node'
 require 'chicago/etl/pipeline/pipeline_builder'
 

@@ -74,7 +74,6 @@ describe "Propagating columns back through the pipeline" do
   end
 
   it "should rename id to original_id automatically" do
-    pending
     @builder.build do
       source(:users) > dimension(:user)
     end
