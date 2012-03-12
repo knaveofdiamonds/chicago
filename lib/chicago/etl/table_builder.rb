@@ -17,7 +17,6 @@ module Chicago
           primary_key :id, :type => :integer, :unsigned => true
           timestamp   :started_at, :null => false, :default => :current_timestamp.sql_function
           timestamp   :finished_at, :null => true, :default => nil
-          timestamp   :extracted_to, :null => true, :default => nil
           enum        :state, :null => false, :elements => %w{Started Finished Error}, :default => "Started"
         end
 
@@ -32,6 +31,14 @@ module Chicago
           smallint    :attempts, :null => false, :unsigned => true
 
           index [:batch_id, :stage, :name], :unique => true
+        end
+
+        create_table :etl_extraction_times do
+          primary_key :id
+          varchar     :name, :null => false
+          timestamp   :extract_from, :null => true, :default => nil
+
+          index :name, :unique => true
         end
       end
 

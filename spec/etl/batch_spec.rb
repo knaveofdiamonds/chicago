@@ -15,26 +15,13 @@ describe Chicago::ETL::Batch do
   end
 
   it "should set the start timestamp of the batch to now when created" do
-    ETL::Batch.instance.start.started_at.to_i.should == Time.now.to_i
+    Timecop.freeze do
+      ETL::Batch.instance.start.started_at.to_i.should == Time.now.to_i
+    end
   end
 
   it "should have a state of 'Started' when started" do
     ETL::Batch.instance.start.state.should == "Started"
-  end
-
-  it "should have a default extracted_to datetime of midnight (this morning)" do
-    now = Time.now
-    ETL::Batch.instance.start.extracted_to.should == Time.local(now.year, now.month, now.day, 0,0,0)
-  end
-
-  it "should be able to specify an extract to date" do
-    now = Date.today - 1
-    ETL::Batch.instance.start(now).extracted_to.should == Time.local(now.year, now.month, now.day, 0,0,0)
-  end
-
-  it "should create a directory tmp/batches/1 under the project root when created" do
-    ETL::Batch.instance.start
-    File.should be_directory(Chicago.project_root + "/tmp/batches/1")
   end
 
   it "should return the batch directory path from #dir" do

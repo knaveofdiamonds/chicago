@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'fileutils'
 require 'logger'
 
@@ -30,7 +31,7 @@ module Chicago
           order(:started_at).last
         end
       end
-
+      
       # Deprecated.
       def load(task_name, &block)
         perform_task(:load, task_name, &block)
@@ -38,11 +39,6 @@ module Chicago
 
       # Deprecated.
       def transform(task_name, &block)
-        perform_task(:extract, task_name, &block)
-      end
-
-      # Deprecated.
-      def extract(task_name, &block)
         perform_task(:extract, task_name, &block)
       end
 
@@ -60,8 +56,8 @@ module Chicago
 
       # Starts this batch.
       def start(extract_to=nil)
-        self.extracted_to = extract_to || Date.today
         save
+        FileUtils.mkdir_p(dir, :mode => 0777)
         if state == "Started"
           log.info "Started ETL batch #{id}."
         else
@@ -95,10 +91,10 @@ module Chicago
         @log ||= Logger.new(File.join(dir, "log"))
       end
 
-      def after_create # :nodoc:
-        FileUtils.mkdir_p(dir, :mode => 0777)
+      def before_create
+        self.started_at = Time.now
       end
-
+      
       private
 
       def find_or_create_task_invocation(stage, name)

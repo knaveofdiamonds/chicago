@@ -25,4 +25,15 @@ describe Chicago::ETL::Pipeline::Pipeline do
     @pipeline.define_source(:database, :name, {:foo => :bar})
     @pipeline.defined_sources[:name].should == source
   end
+
+  it "can have a default source type" do
+    source = stub(:source, :name => :name)
+    builder = mock(:source_builder)
+    builder.should_receive(:build).with(:database, :name, {:foo => :bar}).and_return(source)
+    @pipeline.source_builder = builder
+    @pipeline.default_source_type = :database
+    @pipeline.default_source_opts = {:foo => :bar}
+    @pipeline.define_source(:name)
+    @pipeline.defined_sources[:name].should == source
+  end
 end

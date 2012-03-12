@@ -15,4 +15,5 @@ group :development do
   gem "rcov"
   gem "flog"
   gem "ZenTest"
+  gem "timecop"
 end

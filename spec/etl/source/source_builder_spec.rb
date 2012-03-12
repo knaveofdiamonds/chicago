@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'chicago/etl/source_builder'
+require 'chicago/etl'
 
-describe Chicago::ETL::SourceBuilder, "builds a Source that" do
+describe Chicago::ETL::Source::SourceBuilder, "builds a Source that" do
   before :each do
     @schema = Chicago::StarSchema.new
     @db = stub(:default_source_db).as_null_object

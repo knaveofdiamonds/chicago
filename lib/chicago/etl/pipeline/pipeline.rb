@@ -7,11 +7,15 @@ module Chicago
 
         # The source builder used by defined_source.
         attr_accessor :source_builder
+
+        attr_accessor :default_source_type, :default_source_opts
         
-        def initialize
+        def initialize(options={})
           @nodes = {}
-          @source_builder = SourceBuilder.new
+          @source_builder = Source::SourceBuilder.new
           @defined_sources = Chicago::Data::NamedElementCollection.new
+          @default_source_type = options[:default_source_type]
+          @default_source_opts = options[:default_source_opts]
         end
 
         def dimension_nodes
@@ -36,8 +40,20 @@ module Chicago
         end
         
         # Defines an explicit source for the ETL pipeline.
-        def define_source(type, name, opts, &block)
-          @defined_sources.add(@source_builder.build(type, name, opts, &block))
+        def define_source(*args, &block)
+          if args.size == 1
+            source = build_source_from_default(args.first, &block)
+          else
+            type, name, opts = *args
+            source = @source_builder.build(type, name, opts, &block)
+          end
+          @defined_sources.add(source)
+        end
+
+        private
+
+        def build_source_from_default(name, &block)
+          @source_builder.build(default_source_type, name, default_source_opts, &block)
         end
       end
     end
