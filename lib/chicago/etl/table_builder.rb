@@ -40,6 +40,22 @@ module Chicago
 
           index :name, :unique => true
         end
+
+        create_table :etl_error_log do
+          primary_key :id
+          varchar   :process_name, :null => false
+          integer   :process_version, :null => false
+          varchar   :table
+          varchar   :field
+          integer   :field_id          
+          varchar   :error, :null => false
+          tinyint   :severity, :null => false
+          varchar   :error_detail
+          timestamp :logged_at
+
+          index :logged_at
+          index [:table, :field, :field_id]
+        end
       end
 
       private
