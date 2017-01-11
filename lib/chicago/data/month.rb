@@ -30,7 +30,7 @@ module Chicago
 
       # Months are ordered.
       def <=>(other)
-        to_i <=> other.to_i 
+        to_i <=> other.to_i
       end
 
       # Returns the first day of this month in the given year as a Date.
@@ -71,14 +71,14 @@ module Chicago
         # between 1 and 12.
         def parse(identifier)
           if is_month_number?(identifier)
-            ALL[identifier - 1]
+            ALL[identifier.to_i - 1]
           else
             find_month_by_name(identifier)
           end
         end
 
         def is_month_number?(identifier)
-          identifier.kind_of?(Fixnum) && identifier >= 1 && identifier <= 12
+          identifier.to_i >= 1 && identifier.to_i <= 12
         end
         private :is_month_number?
 
@@ -89,10 +89,10 @@ module Chicago
           end
         end
         private :find_month_by_name
-        
+
         private :new
       end
-      
+
     end
   end
 end

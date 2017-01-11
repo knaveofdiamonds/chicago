@@ -72,9 +72,9 @@ describe "Generic DbTypeConverter" do
     @tc = Database::ConcreteSchemaStrategy.new
   end
 
-  { :smallint  => [-32768, 32767],
-    :smallint  => [0, 65535],
-  }.each do |expected_db_type, range|
+  [[:smallint, [-32768, 32767]],
+   [:smallint, [0, 65535]],
+  ].each do |(expected_db_type, range)|
 
     it "should create a #{expected_db_type} if the maximum column value < #{range.max} and min is >= #{range.min}" do
       column = Schema::Column.new(:id, :integer, :max => range.max, :min => range.min)
@@ -123,18 +123,18 @@ describe Chicago::Database::MysqlStrategy do
   end
 
   context "#db_type" do
-    { :tinyint   => [-127, 128],
-      :tinyint   => [0, 255],
-      :smallint  => [-32768, 32767],
-      :smallint  => [0, 65535],
-      :mediumint => [-8388608, 8388607],
-      :mediumint => [0, 16777215],
-      :integer   => [-2147483648, 2147483647],
-      :integer   => [0, 4294967295],
-      :bigint    => [-9223372036854775808, 9223372036854775807],
-      :bigint    => [0, 18446744073709551615]
+    [ [:tinyint, [-128, 127]],
+      [:tinyint, [0, 255]],
+      [:smallint, [-32768, 32767]],
+      [:smallint, [0, 65535]],
+      [:mediumint, [-8388608, 8388607]],
+      [:mediumint, [0, 16777215]],
+      [:integer, [-2147483648, 2147483647]],
+      [:integer, [0, 4294967295]],
+      [:bigint, [-9223372036854775808, 9223372036854775807]],
+      [:bigint, [0, 18446744073709551615]]
 
-    }.each do |expected_db_type, range|
+    ].each do |(expected_db_type, range)|
 
       it "should return #{expected_db_type} if the maximum column value < #{range.max} and min is >= #{range.min}" do
         column = Schema::Column.new(:id, :integer, :max => range.max, :min => range.min)

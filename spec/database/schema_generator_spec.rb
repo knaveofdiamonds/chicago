@@ -3,25 +3,25 @@ require 'chicago/database/schema_generator'
 
 describe Chicago::Database::SchemaGenerator do
   subject { described_class.new(Chicago::Database::ConcreteSchemaStrategy.new) }
-  
+
   it_behaves_like "a schema visitor"
-  
+
   describe "#visit_fact" do
     before :all do
       schema = Chicago::StarSchema.new
       schema.define_dimension :customer
-      schema.define_dimension :product      
+      schema.define_dimension :product
       @fact = schema.define_fact(:sales) do
         dimensions :customer, :product
         degenerate_dimensions { string :reference }
-        measures { 
-          integer :quantity 
+        measures {
+          integer :quantity
           integer :calculated, :calculation => 1 + 1
         }
         natural_key :customer, :reference
       end
     end
-    
+
     it "should define a sales_facts table" do
       subject.visit_fact(@fact).should have_key(:facts_sales)
     end
@@ -62,7 +62,7 @@ describe Chicago::Database::SchemaGenerator do
     end
 
     it "should not output calculated columns" do
-      subject.visit_fact(@fact)[:facts_sales][:columns].any? {|c| c[:name] == :calculated }.should_not be_true
+      subject.visit_fact(@fact)[:facts_sales][:columns].any? {|c| c[:name] == :calculated }.should_not be true
     end
 
     it "should define non-unique indexes for every dimension" do
@@ -152,7 +152,7 @@ describe Chicago::Database::SchemaGenerator do
 
       expected = {
         :_inserted_at_idx => { :columns => :_inserted_at, :unique => false },
-        :bar_idx => {:columns => [:bar, :baz], :unique => true}, 
+        :bar_idx => {:columns => [:bar, :baz], :unique => true},
         :baz_idx => {:columns => :baz, :unique => false}
       }
       subject.visit_dimension(@dimension)[:dimension_user][:indexes].should == expected
